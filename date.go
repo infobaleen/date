@@ -17,10 +17,10 @@ func NewDate(year, month, day int, loc *time.Location) Date {
 	return Date{day: day, month: month, year: year, loc: loc}
 }
 
-// DateFromTime returns the Date at the specified time
-func DateFromTime(t time.Time) Date {
+// NewDateFromTime returns the Date at the specified time
+func NewDateFromTime(t time.Time) Date {
 	year, month, day := t.Date()
-	return Date{year: year, month: int(month), day: day, loc: t.Location()}
+	return NewDate(year, int(month), day, t.Location())
 }
 
 // Time returns the time at the date at the specified time of day
@@ -41,19 +41,19 @@ func (d Date) Location() *time.Location {
 
 // TodayIn returns the current date in the specified timezone
 func TodayIn(loc *time.Location) Date {
-	return DateFromTime(time.Now().In(loc))
+	return NewDateFromTime(time.Now().In(loc))
 }
 
 // PreviousWeekday returns the clostest previous date which is at the specified weekday.
 func (d Date) PreviousWeekday(day time.Weekday) Date {
 	t := d.Time(0, 0, 0, 0)
-	return DateFromTime(t.AddDate(0, 0, -int((t.Weekday()-day+6)%7)-1))
+	return NewDateFromTime(t.AddDate(0, 0, -int((t.Weekday()-day+6)%7)-1))
 }
 
 // Add returns a modified date. It follows the same rules as t.AddDate().
 func (d Date) Add(year, month, day int) Date {
 	t := d.Time(0, 0, 0, 0)
-	return DateFromTime(t.AddDate(year, month, day))
+	return NewDateFromTime(t.AddDate(year, month, day))
 }
 
 // Before returns true if the first moment of the receiver date occurs before the specified reference.
@@ -73,7 +73,17 @@ func (d Date) String() string {
 
 // IsHoliday returns true if the date is a holiday (may be on a weekend)
 func (d Date) IsHoliday() bool {
-	return d.isHoliday()
+	_, ok := d.HolidayName()
+	return ok
+}
+
+// HolidayName returns the name of the holiday and true if the date is a holiday (may be on a weekend)
+func (d Date) HolidayName() (string, bool) {
+	h, ok := HolidaysByLocation[d.loc.String()]
+	if ok {
+		return h.Find(d)
+	}
+	return "", false
 }
 
 // IsWorkday returns true if the date is neither on a weekend, nor a holiday.

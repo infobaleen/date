@@ -1,36 +1,43 @@
 package date
 
-// Fixed annual swedish holidays
-// Years encodes the starting and end year
-type fixedAnnualHoliday struct {
-	date    Date // Starting date of annual holiday (first year)
-	endYear int  // First year without the holiday (ignored if equal to start year)
-	name    string
+// Holidays contains a specification of holidays, which can be matched with dates
+type Holidays struct {
+	Changing []ChangingHoliday
+	Fixed    []FixedHoliday
 }
 
-// Swedish fixed holidays
-var fixedAnnualHolidays = [...]fixedAnnualHoliday{
-	{date: Date{month: 1, day: 1}, name: "New years day"},
-	{date: Date{month: 1, day: 6}, name: "Epiphany"},
-	{date: Date{month: 5, day: 1}, name: "International worker's day"},
-	{date: Date{month: 6, day: 6}, name: "National day of Sweden"},
-	{date: Date{month: 12, day: 24}, name: "Christmas eve"},
-	{date: Date{month: 12, day: 25}, name: "Christmas day"},
-	{date: Date{month: 12, day: 26}, name: "Second day of Christmas"},
-	{date: Date{month: 12, day: 31}, name: "New Year's Eve"},
+// ChangingHoliday encodes arbitrarily defined holidays, which can be matched with dates
+type ChangingHoliday func(year, month, day int) (string, bool)
+
+// FixedHoliday encodes holidays that repeat annually on the same date
+type FixedHoliday struct {
+	Month, Day         int // Date
+	FirstYear, EndYear int // First year with and without the holiday (EndYear is ignored if it is equal to FirstYear)
+	Name               string
 }
 
-func (f fixedAnnualHoliday) matches(d Date) bool {
-	return d.month == f.date.month && d.day == f.date.day &&
-		d.year >= f.date.year && (f.endYear == f.date.year || d.year < f.endYear)
+// Match returns true if the holiday occurs on the specified date.
+func (f *FixedHoliday) Match(d Date) bool {
+	return d.month == f.Month && d.day == f.Day &&
+		d.year >= f.FirstYear && (f.EndYear == f.FirstYear || d.year < f.EndYear)
 }
 
-func (d Date) isHoliday() bool {
-	// Check fixed Annual Holidays
-	for _, f := range fixedAnnualHolidays {
-		if f.matches(d) {
-			return true
+// Match returns true and the holidays name if a holiday encoded in c occurs on the specified date.
+func (c ChangingHoliday) Match(d Date) (string, bool) {
+	return c(d.year, d.month, d.day)
+}
+
+// Find returns a holiday matching the specified date if there are any.
+func (h *Holidays) Find(d Date) (string, bool) {
+	for _, f := range h.Fixed {
+		if f.Match(d) {
+			return f.Name, true
 		}
 	}
-	return false
+	for i := range h.Changing {
+		if name, ok := h.Changing[i].Match(d); ok {
+			return name, true
+		}
+	}
+	return "", false
 }
