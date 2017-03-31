@@ -34,10 +34,18 @@ var EasterAndFriends ChangingHoliday = func(year, month, day int) (string, bool)
 	return "", false
 }
 
-// MidsummerFriday matches the friday during the period from June 19th to 25th.
+// MidsummerFriday matches the Friday during the period from June 19th to 25th.
 var MidsummerFriday ChangingHoliday = func(year, month, day int) (string, bool) {
 	if month == int(time.June) && 19 <= day && day <= 25 && NewDate(year, month, day, nil).IsWeekday(time.Friday) {
 		return "Midsummer Eve", true
+	}
+	return "", false
+}
+
+// MidsummerSaturday matches the Saturday during the period from June 20th to 26th.
+var MidsummerSaturday ChangingHoliday = func(year, month, day int) (string, bool) {
+	if month == int(time.June) && 20 <= day && day <= 26 && NewDate(year, month, day, nil).IsWeekday(time.Saturday) {
+		return "Midsummer Day", true
 	}
 	return "", false
 }
