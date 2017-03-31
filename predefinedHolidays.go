@@ -1,5 +1,7 @@
 package date
 
+import "time"
+
 // Predefined fixed date holidays
 var (
 	NewYearsDay             = FixedHoliday{Month: 1, Day: 1, Name: "New years day"}
@@ -28,6 +30,14 @@ var EasterAndFriends ChangingHoliday = func(year, month, day int) (string, bool)
 		return "Ascension Day", true
 	case e.Add(0, 0, 49):
 		return "Pentecost", true
+	}
+	return "", false
+}
+
+// MidsummerFriday matches the friday during the period from June 19th to 25th.
+var MidsummerFriday ChangingHoliday = func(year, month, day int) (string, bool) {
+	if month == int(time.June) && 19 <= day && day <= 25 && NewDate(year, month, day, nil).IsWeekday(time.Friday) {
+		return "Midsummer Eve", true
 	}
 	return "", false
 }

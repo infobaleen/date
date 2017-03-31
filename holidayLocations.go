@@ -7,6 +7,6 @@ var HolidaysByLocation = map[string]Holidays{
 		NewYearsEve, NewYearsDay, Epiphany, InternationalWorkersDay, ChristmasEve, ChristmasDay, SecondChristmasDay,
 		{Month: 6, Day: 6, Name: "National day of Sweden"},
 	}, Changing: []ChangingHoliday{
-		EasterAndFriends,
+		EasterAndFriends, MidsummerFriday,
 	}},
 }
