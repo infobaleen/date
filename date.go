@@ -8,6 +8,19 @@ type Date struct {
 	loc              *time.Location
 }
 
+// ParseDate parses a formatted string and returns the value it represents.
+// The layout defines the format by showing how the reference date
+//	Mon Jan 2 2006
+// woud be represented. See the documentation of time.ParseInLocation
+// for more in depth documentation.
+func ParseDate(layout, value string, loc *time.Location) (Date, error) {
+	tim, err := time.ParseInLocation(layout, value, loc)
+	if err != nil {
+		return Date{}, err
+	}
+	return NewDateFromTime(tim), nil
+}
+
 // NewDate returns a Date in the specified location
 // If the location is not specified UTC is assumed
 func NewDate(year, month, day int, loc *time.Location) Date {
