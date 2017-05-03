@@ -81,7 +81,12 @@ func (d Date) After(ref Date) bool {
 
 // String returns a human readable string
 func (d Date) String() string {
-	return d.Time(0, 0, 0, 0).Format("Mon Jan 2 2006 -0700 MST")
+	return d.Time(0, 0, 0, 0).Format("2006-01-02Z07:00")
+}
+
+// MarshalJSON implements a the json.Marshaler interface
+func (d Date) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + d.String() + "\""), nil
 }
 
 // IsHoliday returns true if the date is a holiday (may be on a weekend)
