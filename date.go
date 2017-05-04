@@ -41,6 +41,11 @@ func (d Date) Time(hour, minute, second, nanosecond int) time.Time {
 	return time.Date(d.year, time.Month(d.month), d.day, hour, minute, second, nanosecond, d.loc)
 }
 
+// Unix returns the date as a Unix time, the number of seconds elapsed since January 1, 1970 UTC
+func (d Date) Unix() int64 {
+	return d.Time(0, 0, 0, 0).Unix()
+}
+
 // In returns a new Date in the specified location. The day, month and year remain unchanged.
 func (d Date) In(loc *time.Location) Date {
 	d.loc = loc
