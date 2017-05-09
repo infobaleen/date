@@ -114,9 +114,14 @@ func (d Date) IsWorkday() bool {
 	return !(d.IsWeekday(time.Sunday) || d.IsWeekday(time.Saturday) || d.IsHoliday())
 }
 
+// Weekday returns the weekday of the date
+func (d Date) Weekday() time.Weekday {
+	return d.Time(0, 0, 0, 0).Weekday()
+}
+
 // IsWeekday returns true if the date is on the specified weekday
 func (d Date) IsWeekday(day time.Weekday) bool {
-	return d.Time(0, 0, 0, 0).Weekday() == day
+	return d.Weekday() == day
 }
 
 // PreviousHoliday returns the closest previous holiday (may be on a weekend)
