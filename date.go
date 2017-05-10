@@ -119,6 +119,12 @@ func (d Date) Weekday() time.Weekday {
 	return d.Time(0, 0, 0, 0).Weekday()
 }
 
+// ISOWeek returns the ISO 8601 year and week number in which the date occurs.
+// Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to week 52 or 53 of year n-1, and Dec 29 to Dec 31 might belong to week 1 of year n+1.
+func (d Date) ISOWeek() (year, week int) {
+	return d.Time(0, 0, 0, 0).ISOWeek()
+}
+
 // IsWeekday returns true if the date is on the specified weekday
 func (d Date) IsWeekday(day time.Weekday) bool {
 	return d.Weekday() == day
