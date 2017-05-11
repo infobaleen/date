@@ -125,6 +125,21 @@ func (d Date) ISOWeek() (year, week int) {
 	return d.Time(0, 0, 0, 0).ISOWeek()
 }
 
+// Year returns the year
+func (d Date) Year() int {
+	return d.year
+}
+
+// Month returns the month of the year [1,12]
+func (d Date) Month() time.Month {
+	return time.Month(d.month)
+}
+
+// Day returns the day of the month [1:31]
+func (d Date) Day() int {
+	return d.day
+}
+
 // IsWeekday returns true if the date is on the specified weekday
 func (d Date) IsWeekday(day time.Weekday) bool {
 	return d.Weekday() == day
