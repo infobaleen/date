@@ -15,7 +15,7 @@ var (
 
 // EasterAndFriends matches holidays whose dates are defined relative to easter sunday (western easter).
 // The matched holidays are: "Good Friday", Easter Sunday", "Easter Monday", "Ascension Day", "Pentecost".
-var EasterAndFriends ChangingHoliday = func(year, month, day int) (string, bool) {
+var EasterAndFriends ChangingHoliday = func(year int, month time.Month, day int) (string, bool) {
 	eMonth, eDay := westernEasterDate(year)
 	e := NewDate(year, eMonth, eDay, nil)
 	d := NewDate(year, month, day, nil)
@@ -35,16 +35,16 @@ var EasterAndFriends ChangingHoliday = func(year, month, day int) (string, bool)
 }
 
 // MidsummerFriday matches the Friday during the period from June 19th to 25th.
-var MidsummerFriday ChangingHoliday = func(year, month, day int) (string, bool) {
-	if month == int(time.June) && 19 <= day && day <= 25 && NewDate(year, month, day, nil).IsWeekday(time.Friday) {
+var MidsummerFriday ChangingHoliday = func(year int, month time.Month, day int) (string, bool) {
+	if month == time.June && 19 <= day && day <= 25 && NewDate(year, month, day, nil).IsWeekday(time.Friday) {
 		return "Midsummer Eve", true
 	}
 	return "", false
 }
 
 // MidsummerSaturday matches the Saturday during the period from June 20th to 26th.
-var MidsummerSaturday ChangingHoliday = func(year, month, day int) (string, bool) {
-	if month == int(time.June) && 20 <= day && day <= 26 && NewDate(year, month, day, nil).IsWeekday(time.Saturday) {
+var MidsummerSaturday ChangingHoliday = func(year int, month time.Month, day int) (string, bool) {
+	if month == time.June && 20 <= day && day <= 26 && NewDate(year, month, day, nil).IsWeekday(time.Saturday) {
 		return "Midsummer Day", true
 	}
 	return "", false
@@ -54,7 +54,7 @@ var MidsummerSaturday ChangingHoliday = func(year, month, day int) (string, bool
 // This hopefully returns the western easter dates after year 0 correctly.
 // Knuth documents some predecessor of this, which gives me hope.
 // Help is appreciated if you think you know or can do better.
-func westernEasterDate(year int) (month, day int) {
+func westernEasterDate(year int) (month time.Month, day int) {
 	a := year % 19
 	if year >= 1583 {
 		b := year / 100
@@ -76,7 +76,7 @@ func westernEasterDate(year int) (month, day int) {
 		e := (2*c + 4*b - d + 34) % 7
 		day = 21 + d + e
 	}
-	month = 3 + day/31
+	month = time.Month(3 + day/31)
 	day = day%31 + 1
 	return
 }

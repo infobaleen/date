@@ -4,8 +4,8 @@ import "time"
 
 // Date represents a date with a resolution of one day.
 type Date struct {
-	day, month, year int
-	loc              *time.Location
+	dayStamp int
+	loc      *time.Location
 }
 
 // ParseDate parses a formatted string and returns the value it represents.
@@ -23,22 +23,28 @@ func ParseDate(layout, value string, loc *time.Location) (Date, error) {
 
 // NewDate returns a Date in the specified location
 // If the location is not specified UTC is assumed
-func NewDate(year, month, day int, loc *time.Location) Date {
+func NewDate(year int, month time.Month, day int, loc *time.Location) Date {
 	if loc == nil {
 		loc = time.UTC
 	}
-	return Date{day: day, month: month, year: year, loc: loc}
+	now := time.Date(year, month, day, 0, 0, 0, 0, nil).Unix()
+	if now%(24*60*60) != 0 {
+		panic("this should never happen")
+	}
+	zero := time.Time{}.Unix()
+	return Date{dayStamp: int((now - zero) / (24 * 60 * 60)), loc: loc}
 }
 
 // NewDateFromTime returns the Date at the specified time
 func NewDateFromTime(t time.Time) Date {
 	year, month, day := t.Date()
-	return NewDate(year, int(month), day, t.Location())
+	return NewDate(year, month, day, t.Location())
 }
 
 // Time returns the time at the date at the specified time of day
 func (d Date) Time(hour, minute, second, nanosecond int) time.Time {
-	return time.Date(d.year, time.Month(d.month), d.day, hour, minute, second, nanosecond, d.loc)
+	t := time.Time{}.AddDate(0, 0, d.dayStamp)
+	return time.Date(t.Year(), t.Month(), t.Day(), hour, minute, second, nanosecond, d.loc)
 }
 
 // Unix returns the date as a Unix time, the number of seconds elapsed since January 1, 1970 UTC
@@ -127,17 +133,17 @@ func (d Date) ISOWeek() (year, week int) {
 
 // Year returns the year
 func (d Date) Year() int {
-	return d.year
+	return d.Time(0, 0, 0, 0).Year()
 }
 
 // Month returns the month of the year [1,12]
 func (d Date) Month() time.Month {
-	return time.Month(d.month)
+	return d.Time(0, 0, 0, 0).Month()
 }
 
 // Day returns the day of the month [1:31]
 func (d Date) Day() int {
-	return d.day
+	return d.Time(0, 0, 0, 0).Day()
 }
 
 // IsWeekday returns true if the date is on the specified weekday
@@ -173,4 +179,10 @@ func (d Date) PreviousWorkday() Date {
 			return d
 		}
 	}
+}
+
+// Sub returns d-e, the number of days that elapsed since e until d.
+// If d occured before e, the result is negative.
+func (d Date) Sub(e Date) int {
+	return d.dayStamp - e.dayStamp
 }

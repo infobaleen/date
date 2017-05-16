@@ -14,9 +14,9 @@ var HolidaysByLocation = map[string]Holidays{
 }
 
 // allSaintsDaySweden matches the Saturday betweem October 31st and November 6th.
-var allSaintsDaySweden ChangingHoliday = func(year, month, day int) (string, bool) {
-	dayBefore := NewDate(year, int(time.October), 30, nil)
-	dayAfter := NewDate(year, int(time.November), 7, nil)
+var allSaintsDaySweden ChangingHoliday = func(year int, month time.Month, day int) (string, bool) {
+	dayBefore := NewDate(year, time.October, 30, nil)
+	dayAfter := NewDate(year, time.November, 7, nil)
 	d := NewDate(year, month, day, nil)
 	if d.After(dayBefore) && d.Before(dayAfter) && d.IsWeekday(time.Saturday) {
 		return "All Saints' Day", true
