@@ -27,7 +27,7 @@ func NewDate(year int, month time.Month, day int, loc *time.Location) Date {
 	if loc == nil {
 		loc = time.UTC
 	}
-	now := time.Date(year, month, day, 0, 0, 0, 0, nil).Unix()
+	now := time.Date(year, month, day, 0, 0, 0, 0, time.UTC).Unix()
 	if now%(24*60*60) != 0 {
 		panic("this should never happen")
 	}
