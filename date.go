@@ -3,10 +3,7 @@ package date
 import "time"
 
 // Date represents a date with a resolution of one day.
-type Date struct {
-	dayStamp int
-	loc      *time.Location
-}
+type Date int32
 
 // ParseDate parses a formatted string and returns the value it represents.
 // The layout defines the format by showing how the reference date
@@ -14,9 +11,9 @@ type Date struct {
 // woud be represented. See the documentation of time.ParseInLocation
 // for more in depth documentation.
 func ParseDate(layout, value string, loc *time.Location) (Date, error) {
-	tim, err := time.ParseInLocation(layout, value, loc)
+	tim, err := time.ParseInLocation(layout, value, nil)
 	if err != nil {
-		return Date{}, err
+		return 0, err
 	}
 	return NewDateFromTime(tim), nil
 }
@@ -27,12 +24,12 @@ func NewDate(year int, month time.Month, day int, loc *time.Location) Date {
 	if loc == nil {
 		loc = time.UTC
 	}
-	now := time.Date(year, month, day, 0, 0, 0, 0, nil).Unix()
+	now := time.Date(year, month, day, 0, 0, 0, 0, time.UTC).Unix()
 	if now%(24*60*60) != 0 {
 		panic("this should never happen")
 	}
 	zero := time.Time{}.Unix()
-	return Date{dayStamp: int((now - zero) / (24 * 60 * 60)), loc: loc}
+	return Date((now - zero) / (24 * 60 * 60))
 }
 
 // NewDateFromTime returns the Date at the specified time
@@ -42,25 +39,13 @@ func NewDateFromTime(t time.Time) Date {
 }
 
 // Time returns the time at the date at the specified time of day
-func (d Date) Time(hour, minute, second, nanosecond int) time.Time {
-	t := time.Time{}.AddDate(0, 0, d.dayStamp)
-	return time.Date(t.Year(), t.Month(), t.Day(), hour, minute, second, nanosecond, d.loc)
+func (d Date) Time(hour, minute, second, nanosecond int, loc *time.Location) time.Time {
+	return time.Date(0, 0, int(d), hour, minute, second, nanosecond, loc)
 }
 
 // Unix returns the date as a Unix time, the number of seconds elapsed since January 1, 1970 UTC
-func (d Date) Unix() int64 {
-	return d.Time(0, 0, 0, 0).Unix()
-}
-
-// In returns a new Date in the specified location. The day, month and year remain unchanged.
-func (d Date) In(loc *time.Location) Date {
-	d.loc = loc
-	return d
-}
-
-// Location returns the location of the date.
-func (d Date) Location() *time.Location {
-	return d.loc
+func (d Date) Unix(loc *time.Location) int64 {
+	return d.Time(0, 0, 0, 0, loc).Unix()
 }
 
 // TodayIn returns the current date in the specified timezone
@@ -70,29 +55,28 @@ func TodayIn(loc *time.Location) Date {
 
 // PreviousWeekday returns the clostest previous date which is at the specified weekday.
 func (d Date) PreviousWeekday(day time.Weekday) Date {
-	t := d.Time(0, 0, 0, 0)
-	return NewDateFromTime(t.AddDate(0, 0, -int((t.Weekday()-day+6)%7)-1))
+	return d - Date((d.Weekday()-day+6)%7) - 1
 }
 
 // Add returns a modified date. It follows the same rules as t.AddDate().
 func (d Date) Add(year, month, day int) Date {
-	t := d.Time(0, 0, 0, 0)
+	t := d.Time(0, 0, 0, 0, nil)
 	return NewDateFromTime(t.AddDate(year, month, day))
 }
 
 // Before returns true if the first moment of the receiver date occurs before the specified reference.
 func (d Date) Before(ref Date) bool {
-	return d.Time(0, 0, 0, 0).Before(ref.Time(0, 0, 0, 0))
+	return d < ref
 }
 
 // After returns true if the first moment of the receiver date occurs after the specified reference.
 func (d Date) After(ref Date) bool {
-	return d.Time(0, 0, 0, 0).After(ref.Time(0, 0, 0, 0))
+	return d > ref
 }
 
 // String returns a human readable string
 func (d Date) String() string {
-	return d.Time(0, 0, 0, 0).Format("2006-01-02Z07:00")
+	return d.Time(0, 0, 0, 0, nil).Format("2006-01-02")
 }
 
 // MarshalJSON implements a the json.Marshaler interface
@@ -100,50 +84,30 @@ func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + d.String() + "\""), nil
 }
 
-// IsHoliday returns true if the date is a holiday (may be on a weekend)
-func (d Date) IsHoliday() bool {
-	_, ok := d.HolidayName()
-	return ok
-}
-
-// HolidayName returns the name of the holiday and true if the date is a holiday (may be on a weekend)
-func (d Date) HolidayName() (string, bool) {
-	h, ok := HolidaysByLocation[d.loc.String()]
-	if ok {
-		return h.Find(d)
-	}
-	return "", false
-}
-
-// IsWorkday returns true if the date is neither on a weekend, nor a holiday.
-func (d Date) IsWorkday() bool {
-	return !(d.IsWeekday(time.Sunday) || d.IsWeekday(time.Saturday) || d.IsHoliday())
-}
-
 // Weekday returns the weekday of the date
 func (d Date) Weekday() time.Weekday {
-	return d.Time(0, 0, 0, 0).Weekday()
+	return d.Time(0, 0, 0, 0, nil).Weekday() // TODO: We can do that ourselves.
 }
 
 // ISOWeek returns the ISO 8601 year and week number in which the date occurs.
 // Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to week 52 or 53 of year n-1, and Dec 29 to Dec 31 might belong to week 1 of year n+1.
 func (d Date) ISOWeek() (year, week int) {
-	return d.Time(0, 0, 0, 0).ISOWeek()
+	return d.Time(0, 0, 0, 0, nil).ISOWeek() // TODO: We can do that ourselves.
 }
 
 // Year returns the year
 func (d Date) Year() int {
-	return d.Time(0, 0, 0, 0).Year()
+	return d.Time(0, 0, 0, 0, nil).Year() // TODO: We can do that ourselves.
 }
 
 // Month returns the month of the year [1,12]
 func (d Date) Month() time.Month {
-	return d.Time(0, 0, 0, 0).Month()
+	return d.Time(0, 0, 0, 0, nil).Month() // TODO: We can do that ourselves.
 }
 
 // Day returns the day of the month [1:31]
 func (d Date) Day() int {
-	return d.Time(0, 0, 0, 0).Day()
+	return d.Time(0, 0, 0, 0, nil).Day() // TODO: We can do that ourselves.
 }
 
 // IsWeekday returns true if the date is on the specified weekday
@@ -151,38 +115,8 @@ func (d Date) IsWeekday(day time.Weekday) bool {
 	return d.Weekday() == day
 }
 
-// PreviousHoliday returns the closest previous holiday (may be on a weekend)
-func (d Date) PreviousHoliday() Date {
-	for {
-		d = d.Add(0, 0, -1)
-		if d.IsHoliday() {
-			return d
-		}
-	}
-}
-
-// PreviousNonWorkday returns the closest previous day that is either a holiday or on a weekend
-func (d Date) PreviousNonWorkday() Date {
-	for {
-		d = d.Add(0, 0, -1)
-		if !d.IsWorkday() {
-			return d
-		}
-	}
-}
-
-// PreviousWorkday returns the closest previous day that is neither on a weekend, nor a holiday.
-func (d Date) PreviousWorkday() Date {
-	for {
-		d = d.Add(0, 0, -1)
-		if d.IsWorkday() {
-			return d
-		}
-	}
-}
-
 // Sub returns d-e, the number of days that elapsed since e until d.
 // If d occured before e, the result is negative.
-func (d Date) Sub(e Date) int {
-	return d.dayStamp - e.dayStamp
+func (d Date) Sub(e Date) int32 {
+	return int32(d - e)
 }
