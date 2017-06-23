@@ -37,6 +37,9 @@ func NewDateFromTime(t time.Time) Date {
 
 // Time returns the time at the date at the specified time of day
 func (d Date) Time(hour, minute, second, nanosecond int, loc *time.Location) time.Time {
+	if loc == nil {
+		loc = time.UTC
+	}
 	return time.Date(0, 0, int(d), hour, minute, second, nanosecond, loc)
 }
 
