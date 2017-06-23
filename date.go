@@ -10,7 +10,7 @@ type Date int32
 //	Mon Jan 2 2006
 // woud be represented. See the documentation of time.ParseInLocation
 // for more in depth documentation.
-func ParseDate(layout, value string, loc *time.Location) (Date, error) {
+func ParseDate(layout, value string) (Date, error) {
 	tim, err := time.ParseInLocation(layout, value, nil)
 	if err != nil {
 		return 0, err
@@ -20,10 +20,7 @@ func ParseDate(layout, value string, loc *time.Location) (Date, error) {
 
 // NewDate returns a Date in the specified location
 // If the location is not specified UTC is assumed
-func NewDate(year int, month time.Month, day int, loc *time.Location) Date {
-	if loc == nil {
-		loc = time.UTC
-	}
+func NewDate(year int, month time.Month, day int) Date {
 	now := time.Date(year, month, day, 0, 0, 0, 0, time.UTC).Unix()
 	if now%(24*60*60) != 0 {
 		panic("this should never happen")
@@ -35,7 +32,7 @@ func NewDate(year int, month time.Month, day int, loc *time.Location) Date {
 // NewDateFromTime returns the Date at the specified time
 func NewDateFromTime(t time.Time) Date {
 	year, month, day := t.Date()
-	return NewDate(year, month, day, t.Location())
+	return NewDate(year, month, day)
 }
 
 // Time returns the time at the date at the specified time of day
