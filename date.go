@@ -27,6 +27,11 @@ func NewDate(year int, month time.Month, day int) Date {
 	return Date((seconds) / (24 * 60 * 60))
 }
 
+// Today returns the current date in your local timezone (see time.Now() for details).
+func Today() Date {
+	return NewDate(time.Now().Date())
+}
+
 // Time returns the time at the date at the specified time of day
 func (d Date) Time(hour, minute, second, nanosecond int, loc *time.Location) time.Time {
 	if loc == nil {
