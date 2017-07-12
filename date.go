@@ -7,6 +7,26 @@ import (
 // Date represents a date with a resolution of one day.
 type Date int32
 
+// First returns the earliest provided date
+func First(d Date, ds ...Date) Date {
+	for _, de := range ds {
+		if d > de {
+			d = de
+		}
+	}
+	return d
+}
+
+// Last returns the latest provided date
+func Last(d Date, ds ...Date) Date {
+	for _, de := range ds {
+		if d < de {
+			d = de
+		}
+	}
+	return d
+}
+
 // ParseDate parses a formatted string and returns the value it represents.
 // The layout defines the format by showing how the reference date
 //	Mon Jan 2 2006
