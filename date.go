@@ -7,6 +7,12 @@ import (
 // Date represents a date with a resolution of one day.
 type Date int32
 
+// Limits
+const (
+	Min = -1 << 31
+	Max = 1<<31 - 1
+)
+
 // First returns the earliest provided date
 func First(d Date, ds ...Date) Date {
 	for _, de := range ds {
