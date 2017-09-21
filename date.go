@@ -39,7 +39,7 @@ func Last(d Date, ds ...Date) Date {
 // woud be represented. See the documentation of time.ParseInLocation
 // for more in depth documentation.
 func ParseDate(layout, value string) (Date, error) {
-	tim, err := time.ParseInLocation(layout, value, nil)
+	tim, err := time.ParseInLocation(layout, value, time.UTC)
 	if err != nil {
 		return 0, err
 	}
