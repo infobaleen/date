@@ -109,3 +109,13 @@ func (d Date) Month() time.Month {
 func (d Date) Day() int {
 	return time.Time{}.AddDate(0, 0, int(d)).Day()
 }
+
+// Format returns a textual representation of the time value formatted
+// according to layout, which defines the format by showing how the reference
+// time, defined to be
+//	Mon Jan 2 15:04:05 -0700 MST 2006
+// would be displayed if it were the value; it serves as an example of the
+// desired output. See time.Time.Format for details.
+func (d Date) Format(layout string) string {
+	return d.Time(0, 0, 0, 0, nil).Format(layout)
+}
