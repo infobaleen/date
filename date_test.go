@@ -29,3 +29,12 @@ func TestWeekday(t *testing.T) {
 		}
 	}
 }
+
+func TestTime(t *testing.T) {
+	var dRef, hRef, mRef, sRef, nRef = ThursdayJune15th2017, 1, 2, 3, 4
+	var dhmsn = dRef.Time(hRef, mRef, sRef, nRef, time.UTC)
+	var d, h, m, s, n = NewDate(dhmsn.Date()), dhmsn.Hour(), dhmsn.Minute(), dhmsn.Second(), dhmsn.Nanosecond()
+	if d != dRef || h != hRef || m != mRef || s != sRef || n != nRef {
+		t.Error(d, h, m, s, n, "!=", dRef, hRef, mRef, sRef, nRef)
+	}
+}

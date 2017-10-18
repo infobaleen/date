@@ -63,7 +63,7 @@ func (d Date) Time(hour, minute, second, nanosecond int, loc *time.Location) tim
 	if loc == nil {
 		loc = time.UTC
 	}
-	return time.Time{}.AddDate(0, 0, int(d))
+	return time.Date(1, time.January, int(d)+1, hour, minute, second, nanosecond, loc)
 }
 
 // PreviousWeekday returns the clostest previous date which is at the specified weekday.
