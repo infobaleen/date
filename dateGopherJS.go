@@ -1,5 +1,3 @@
-// +build js
-
 package date
 
 import (
@@ -7,7 +5,9 @@ import (
 	"github.com/gopherjs/jsbuiltin"
 )
 
-// Supports strings, Date and Moment from Moments.js
+// NewDateFromJSObject returns the date encoded in a JavaScript object.
+// Supported argument types are string (YYYY-MM-DD), Date or any object with a
+// toISOString() method (e.g. Moment from Moments.js).
 func NewDateFromJSObject(jsDate *js.Object) Date {
 	const format = "2006-01-02"
 	var str string
